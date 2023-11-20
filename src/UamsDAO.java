@@ -1,6 +1,7 @@
 import org.postgresql.ds.PGSimpleDataSource;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -87,6 +88,57 @@ public class UamsDAO {
             return true;
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return false;
+        }
+    }
+
+
+    public boolean updateUserInfo(UUID userSession, User existingUser, String newUsername, String newPassword, String[] newSecurityAnswers, User.ROLE newUserRole) {
+        // check valid user session
+        if (loginSessionManager.getUser(userSession) == null) {
+            System.out.println("Invalid user session");
+            return false;
+        }
+
+        try (Connection connection = dataSource.getConnection()) {
+
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM users WHERE username = '" + existingUser.getUsername() + "'");
+            if (!resultSet.next()) {
+                System.out.println("User does not exist.");
+                return false;
+            }
+
+            String updateQuery = "UPDATE users SET username = ?, password = ?, user_role = ?, security_answers = ? WHERE username = ?";
+            try (PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
+                if (newUsername != null) {
+                    updateStatement.setString(1, newUsername);
+                }
+                if (newPassword != null) {
+                    updateStatement.setString(2, newPassword);
+                }
+                if (newUserRole != null) {
+                    updateStatement.setString(3, newUserRole.toString());
+                }
+                if (newSecurityAnswers != null) {
+                    updateStatement.setArray(4, connection.createArrayOf("text", newSecurityAnswers));
+                }
+
+                updateStatement.setString(5, existingUser.getUsername());
+
+                int rowsAffected = updateStatement.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    System.out.println("User information updated successfully.");
+                    return true;
+                } else {
+                    System.out.println("Failed to update user information.");
+                    return false;
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database (updateUserInfo).");
             printDBError(e);
             return false;
         }
