@@ -1,8 +1,6 @@
 import org.postgresql.ds.PGSimpleDataSource;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
@@ -77,7 +75,7 @@ public class UamsDAO {
             return false;
         }
         try (Connection connection = dataSource.getConnection()) {
-            // Check if user already exists
+            // Check if scholarship exists
             ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM users WHERE username = '" + newUser.getUsername() + "'");
             if (resultSet.next()) {
                 System.out.println("User already exists.");
@@ -89,6 +87,110 @@ public class UamsDAO {
             System.out.println("There was a problem with the database.");
             printDBError(e);
             return false;
+        }
+    }
+
+    public boolean CreateScholarship(UUID userSession, String name, String deadline, String description, String[] customIF, boolean Email, boolean NetID, boolean Name,
+                                     boolean Ethnicity, boolean Gender, boolean SchoolYear, boolean GPA, boolean Major, boolean Citizenship) {
+
+        if (loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN) {
+            System.out.println("User is not an admin.");
+            return false;
+        }
+        try (Connection connection = dataSource.getConnection()) {
+            // Check if scholarship already exists
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM scholarship_forms WHERE name = '" + name + "'");
+            if (resultSet.next()) {
+                System.out.println("Scholarship already exists.");
+                return false;
+            }
+            String Custom = "ARRAY[";
+            for (int i = 0; i < customIF.length; i++) {
+                Custom += "'" + customIF[i] + "'";
+                if (i < customIF.length - 1) {
+                    Custom += ", ";
+                }
+            }
+            Custom += "]";
+            connection.createStatement().execute("INSERT INTO scholarship_forms VALUES ('%s', '%s', %s, '%s', '%s', '%b', '%b', '%b', '%b', '%b', '%b', '%b', '%b', '%b')".formatted
+                    (UUID.randomUUID(), name, Custom, deadline, description, Email, NetID, GPA, Major, SchoolYear, Gender, Citizenship, Name, Ethnicity));
+            return true;
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return false;
+        }
+    }
+
+    public ResultSet RetrieveScholarshipForm(UUID userSession, String gname, String gdeadline) {
+        //Query the database Scholarship_forms looking for a scholarship that matches the given name and deadline
+
+        if ((loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN) && (loginSessionManager.getUser(userSession).getRole() != User.ROLE.STUDENT)) {
+            System.out.println("User is not an admin or a student.");
+            return null;
+        }
+        try (Connection connection = dataSource.getConnection()) {
+            // Check if user already exists
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM scholarship_forms WHERE name = '" + gname + "'");
+            while (resultSet.next()) {
+                String ScholarshipName = resultSet.getString("name");
+                String ScholarshipDeadline = resultSet.getString("deadline");
+                if (ScholarshipName.equals(gname) && ScholarshipDeadline.equals(gdeadline)) {
+                    //System.out.println(resultSet.getString("name"));
+                    return resultSet;
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return null;
+        }
+        return null;
+    }
+
+    public void UpdateScholarshipForm(UUID userSession, String name, String deadline, String updateWhat, String updateTo) {
+        if (loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN) {
+            System.out.println("User is not an admin.");
+        }
+        try (Connection connection = dataSource.getConnection()) {
+            String updateQ = "UPDATE scholarship_forms SET " + updateWhat + " = ? WHERE name = ?";
+            PreparedStatement prepare = connection.prepareStatement(updateQ);
+            // Check if scholarship exists
+            ResultSet resultSet = RetrieveScholarshipForm(userSession, name, deadline);
+            if (resultSet.next()) {
+                System.out.println("scholarship does not exist.");
+            }
+            if(updateTo.equals("true") || updateTo.equals("false")){
+                boolean value = Boolean.parseBoolean(updateTo);
+                prepare.setBoolean(1, value);
+                prepare.setString(2, name);
+            }
+            else{
+                prepare.setString(1, updateTo);
+                prepare.setString(2, name);
+            }
+            prepare.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+        }
+    }
+
+    public void RemoveScholarshipsYearly(UUID userSession, String year){
+        if (loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN) {
+            System.out.println("User is not an admin.");
+        }
+        try (Connection connection = dataSource.getConnection()) {
+            // Check if scholarship already exists
+            ResultSet resultSet = connection.createStatement().executeQuery("DELETE FROM scholarship_forms WHERE YEAR(deadline) = '" + year + "'");
+            if (resultSet.next()) {
+                System.out.println("Scholarships do not exist.");
+            }
+        }
+        catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+
         }
     }
 
