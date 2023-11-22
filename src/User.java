@@ -11,7 +11,7 @@ public class User {
     private String[] securityAnswers;
     private boolean isEnabled;
 
-    public User(String username, String password, ROLE role, String[] securityAnswers, boolean isEnabled) {
+    public User(String username, String password, ROLE role, String[] securityAnswers, String email, boolean isEnabled) {
         this.username = username;
         this.password = password;
         this.role = role;
@@ -46,6 +46,8 @@ public class User {
         securityAnswersAsString += "]";
         return securityAnswersAsString;
     }
+
+    public String email;
 
     public boolean isEnabled() {
         return isEnabled;
