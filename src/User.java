@@ -2,7 +2,7 @@ import java.sql.Array;
 
 public class User {
     public static enum ROLE {
-        ADMIN, STUDENT
+        ADMIN, STUDENT, REVIEWER, PROVIDER, IT, FUND_STEWARD, AUTH_STAFF
     }
 
     private String username;
