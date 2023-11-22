@@ -19,7 +19,12 @@ public class TestDB {
 
     public static void testUpdateUserInfo(UamsDAO uamsDAO) {
         UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
-        uamsDAO.updateUserInfo(sessionID, new User("jacob", "lol", User.ROLE.STUDENT, new String[]{"Phan", "lol", "lol"}), "updateJacob", "newpassword", new String[]{"1", "2", "3"}, User.ROLE.STUDENT);
+        uamsDAO.createUser(sessionID, new User("IT_account", "IT_password", User.ROLE.IT, new String[]{"IT", "IT", "IT"}, "it@arizona.edu", true));
+
+        // IT people log in
+        UUID sessionIDIT = uamsDAO.loginWithSecurityAnswer("IT_account", "IT_password", "What is your mother's maiden name?", "IT");
+        // IT people modifies the user info
+        uamsDAO.modifyUser(sessionIDIT, new User("jacob", "lol", User.ROLE.STUDENT, new String[]{"Phan", "lol", "lol"}), "jacob", "newpassword", new String[]{"1a", "2a", "3a"}, User.ROLE.PROVIDER);
     }
 
 }
