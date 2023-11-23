@@ -1,3 +1,4 @@
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -37,9 +38,13 @@ public class TestDB {
         // get an existing scholarship_form's uuid
         UUID scholarshipID = UUID.fromString("118c6269-5dbf-4efd-9e28-c178dd887319"); //TODO: Unsafe. Replace w/ a uamsDAO.getScholarship().getScholarshipID() function
 
+        // get an existing local PC file "testfile.txt" on local desktop
+        String desktopPath = System.getProperty("user.home") + "\\Desktop";
+        File testfile = new File(desktopPath, "testfile.txt");
+
         // create a test application
         String[] responses = {"response1", "lol2", "something3", "1a", "2b", "3c", "lmao", "4d", "5e", "6f"};
-        Application application = new Application("jphan07", scholarshipID, responses, "[legit server filepath]");
+        Application application = new Application("jphan07", scholarshipID, responses, testfile);
 
         // attempt saving
         boolean isSaved = uamsDAO.saveApplication(sessionID, application);
@@ -57,7 +62,7 @@ public class TestDB {
 
 
         //print application_got
-        System.out.println("ScholarshipID: %s".formatted(application_got.getScholarshipID()));
+        System.out.println("\nScholarshipID: %s".formatted(application_got.getScholarshipID()));
         System.out.println("StudentUsername: %s".formatted(application_got.getUsername()));
         System.out.println("Responses: %s".formatted(String.join(", ", application_got.getResponses())));
         System.out.println("PathToFileUpload: %s".formatted(application_got.getUploadedFilePath()));

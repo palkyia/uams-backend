@@ -1,5 +1,8 @@
 import org.postgresql.ds.PGSimpleDataSource;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.StandardCopyOption;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -7,6 +10,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class UamsDAO {
 
@@ -59,7 +64,7 @@ public class UamsDAO {
                 return null;
             }
             // You can access the columns of the current row by calling the getXXX() method on the result set object, where XXX is the type of the column and the parameter is the name of the column.
-            User user = new User(resultSet.getString("username"), resultSet.getString("password"), User.ROLE.valueOf(resultSet.getString("user_role")), (String[]) resultSet.getArray("security_answers").getArray(), resultSet.getBoolean("enabled"));
+            User user = new User(resultSet.getString("username"), resultSet.getString("password"), User.ROLE.valueOf(resultSet.getString("user_role")), (String[]) resultSet.getArray("security_answers").getArray(), resultSet.getString("email"), resultSet.getBoolean("enabled"));
             if (!user.isEnabled()) {
                 System.out.println("User is not enabled.");
                 return null;
@@ -126,10 +131,12 @@ public class UamsDAO {
 
             if (resultSet.next()) {
                 // overwrite existing with new
-                connection.createStatement().execute("UPDATE applications SET custom_responses = %s, uploaded_file_path = '%s' WHERE student_username = '%s' AND scholarship_id = '%s'".formatted(arrayToSQLString(application.getResponses()), application.getUploadedFilePath(), application.getUsername(), application.getScholarshipID().toString()));
+                String uploadServerLocation = uploadFileToServer(application.getUploadedFile());
+                connection.createStatement().execute("UPDATE applications SET custom_responses = %s, uploaded_file_path = '%s' WHERE student_username = '%s' AND scholarship_id = '%s'".formatted(arrayToSQLString(application.getResponses()), uploadServerLocation, application.getUsername(), application.getScholarshipID().toString()));
             } else {
                 // no existing, so insert new
-                connection.createStatement().execute("INSERT INTO applications (scholarship_id, student_username, custom_responses, uploaded_file_path) VALUES ('%s', '%s', %s, '%s')".formatted(application.getScholarshipID().toString(), application.getUsername(), arrayToSQLString(application.getResponses()), application.getUploadedFilePath()));
+                String uploadServerLocation = uploadFileToServer(application.getUploadedFile());
+                connection.createStatement().execute("INSERT INTO applications (scholarship_id, student_username, custom_responses, uploaded_file_path) VALUES ('%s', '%s', %s, '%s')".formatted(application.getScholarshipID().toString(), application.getUsername(), arrayToSQLString(application.getResponses()), uploadServerLocation));
             }
             return true;
         } catch (SQLException e) {
@@ -156,10 +163,44 @@ public class UamsDAO {
                 return null;
             }
             // found, so return it
-            return new Application(username, scholarshipID, (String[]) (resultSet.getArray("custom_responses")).getArray(), resultSet.getString("uploaded_file_path"));
+            File appilcation_file = new File(resultSet.getString("uploaded_file_path"));
+            return new Application(username, scholarshipID, (String[]) (resultSet.getArray("custom_responses")).getArray(), appilcation_file);
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
             printDBError(e);
+            return null;
+        }
+    }
+
+    /**
+     * Saves a file into the UASAMS server
+     *
+     * @param inputFile
+     * @return String (location file was saved in server), else null (error saving)
+     */
+    public static String uploadFileToServer(File inputFile) {
+        String uploadFolderName = "file_uploads";
+        String serverDirectory = System.getProperty("user.dir");
+        File uploadsFolder = new File(serverDirectory, uploadFolderName);
+
+        // Create the subfolder if it does not exist
+        if (!uploadsFolder.exists()) {
+            boolean folderCreated = uploadsFolder.mkdir();
+            if (!folderCreated) {
+                System.out.println("Failed to create folder for uploads.");
+                return null;
+            }
+        }
+
+        // Create a Path for the destination file in 'file_uploads' folder
+        Path destinationPath = uploadsFolder.toPath().resolve(inputFile.getName());
+
+        try {
+            // copy file to server
+            Files.copy(inputFile.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            return destinationPath.toString();
+        } catch (IOException e) {
+            System.out.println("Failed to copy the file.");
             return null;
         }
     }

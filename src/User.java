@@ -16,6 +16,7 @@ public class User {
         this.password = password;
         this.role = role;
         this.securityAnswers = securityAnswers;
+        this.email = email;
         this.isEnabled = isEnabled;
     }
 

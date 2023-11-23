@@ -1,4 +1,5 @@
 
+import java.io.File;
 import java.util.UUID;
 
 /**
@@ -9,17 +10,17 @@ public class Application {
     private String username;
     private UUID scholarshipID;
     private String[] responses; // user responses to ScholarshipForm's fields
-    private String uploadedFilePath; // path to file inside UASAMS server
+    private File uploadedFile; // path to file inside UASAMS server
 
 
     /*
     Constructors
     */
-    public Application(String username, UUID scholarshipID, String[] responses, String uploadedFilePath) {
+    public Application(String username, UUID scholarshipID, String[] responses, File uploadedFile) {
         this.username = username;
         this.scholarshipID = scholarshipID;
         this.responses = responses;
-        this.uploadedFilePath = uploadedFilePath;
+        this.uploadedFile = uploadedFile;
     }
 
 
@@ -38,8 +39,12 @@ public class Application {
         return responses;
     }
 
+    public File getUploadedFile() {
+        return uploadedFile;
+    }
+
     public String getUploadedFilePath() {
-        return uploadedFilePath;
+        return uploadedFile.getPath();
     }
 
 
