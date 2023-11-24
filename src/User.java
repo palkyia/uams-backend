@@ -9,6 +9,7 @@ public class User {
     private String password;
     private ROLE role;
     private String[] securityAnswers;
+    private String email;
     private boolean isEnabled;
 
     public User(String username, String password, ROLE role, String[] securityAnswers, String email, boolean isEnabled) {
@@ -48,7 +49,9 @@ public class User {
         return securityAnswersAsString;
     }
 
-    public String email;
+    public String getEmail() {
+        return email;
+    }
 
     public boolean isEnabled() {
         return isEnabled;

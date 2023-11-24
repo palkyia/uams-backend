@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.StandardCopyOption;
 import java.sql.Array;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -27,10 +29,6 @@ public class UamsDAO {
     private PGSimpleDataSource dataSource;
     private LoginSessionManager loginSessionManager;
 
-
-    /*
-    Constructors
-     */
     public UamsDAO() {
         dataSource = new PGSimpleDataSource();
         dataSource.setURL(DB_URL);
@@ -39,10 +37,6 @@ public class UamsDAO {
         loginSessionManager = new LoginSessionManager();
     }
 
-
-    /*
-    Login Functions
-     */
     public String getSecurityQuestion(String username) {
         Random random = new Random();
         return securityQuestions[random.nextInt(0, securityQuestions.length)];
@@ -84,10 +78,6 @@ public class UamsDAO {
         return null;
     }
 
-
-    /*
-    User-related Functions
-     */
     public boolean createUser(UUID userSession, User newUser) {
         // Protect routes using roles
         if (loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN) {
@@ -101,12 +91,124 @@ public class UamsDAO {
                 System.out.println("User already exists.");
                 return false;
             }
-            connection.createStatement().execute("INSERT INTO users VALUES ('%s', '%s', '%s', %s, %s)".formatted(newUser.getUsername(), newUser.getPassword(), newUser.getRole().toString(), newUser.getSecurityAnswersAsString(), newUser.isEnabled()));
+            connection.createStatement().execute("INSERT INTO users VALUES ('%s', '%s', '%s', %s, %s, %s)".formatted(newUser.getUsername(), newUser.getPassword(), newUser.getRole().toString(), newUser.getSecurityAnswersAsString(), newUser.isEnabled(), newUser.getEmail()));
             return true;
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
             printDBError(e);
             return false;
+        }
+    }
+
+    //Student Information related functions
+
+
+    // function to store student information, student has to be existing user
+    public boolean saveStudentInfo(UUID userSession, Student student) {
+        // check role
+        if (loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN &&
+                loginSessionManager.getUser(userSession).getRole() != User.ROLE.IT &&
+                loginSessionManager.getUser(userSession).getRole() != User.ROLE.AUTH_STAFF) {
+            System.out.println("No Authority to store student information.");
+            return false;
+        }
+
+        try (Connection connection = dataSource.getConnection()) {
+            // Check if student already exists
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM student_info WHERE user_id = '" + student.getUsername() + "'");
+
+            if (resultSet.next()) {
+                System.out.println("Student already exists.");
+                return false;
+            } else {
+                connection.createStatement().execute(("INSERT INTO student_info VALUES ('%s', '%s', '%s', '%s', '%s', " +
+                        "'%s', '%s', '%s', '%s' , '%s')").formatted(student.getUsername(),
+                        student.getNetID(), student.getFirstName(), student.getLastName(), student.getEthnicity(), student.getGender(),
+                        student.getMajor(), student.getSchoolYear(), student.getGpa(), student.getCitizenshipStatus()));
+            }
+            return true;
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return false;
+        }
+    }
+    // update existing student information
+
+    public void updateStudentInfo(UUID userSession, Student existingStudent, String newUsername,
+                                  String newNetID, String newFirstName, String newLastName,
+                                  String newEthnicity, String newGender, String newMajor,
+                                  String newSchoolYear, double newGpa, boolean newCitizenshipStatus) {
+
+        if (loginSessionManager.getUser(userSession) == null) {
+            System.out.println("User is not logged in.");
+        }
+
+        // check role
+        if (loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN &&
+                loginSessionManager.getUser(userSession).getRole() != User.ROLE.IT &&
+                loginSessionManager.getUser(userSession).getRole() != User.ROLE.AUTH_STAFF) {
+            System.out.println("No authority to update student information.");
+        }
+
+        try (Connection connection = dataSource.getConnection()) {
+            // Check if student already exists
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM student_info WHERE user_id = '" + existingStudent.getUsername() + "'");
+
+            if (!resultSet.next()) {
+                System.out.println("Student does not exist.");
+            }
+            String queryUpdateStudentInfo = "UPDATE student_info SET user_id = ?, net_id = ?, first_name = ?, last_name = ?, ethnicity = ?, gender = ?, major = ?, year = ?, gpa = ?, citizenship = ? WHERE user_id = ?";
+            try (PreparedStatement updatedStatement = connection.prepareStatement(queryUpdateStudentInfo)) {
+                updatedStatement.setString(1, newUsername != null ? newUsername : existingStudent.getUsername());
+                updatedStatement.setString(2, newNetID != null ? newNetID : existingStudent.getNetID());
+                updatedStatement.setString(3, newFirstName != null ? newFirstName : existingStudent.getFirstName());
+                updatedStatement.setString(4, newLastName != null ? newLastName : existingStudent.getLastName());
+                updatedStatement.setString(5, newEthnicity != null ? newEthnicity : existingStudent.getEthnicity());
+                updatedStatement.setString(6, newGender != null ? newGender : existingStudent.getGender());
+                updatedStatement.setString(7, newMajor != null ? newMajor : existingStudent.getMajor());
+                updatedStatement.setString(8, newSchoolYear != null ? newSchoolYear : existingStudent.getSchoolYear());
+                updatedStatement.setDouble(9, newGpa);
+                updatedStatement.setBoolean(10, newCitizenshipStatus);
+                updatedStatement.setString(11, existingStudent.getUsername());
+
+                int rowsUpdated = updatedStatement.executeUpdate();
+                if (rowsUpdated > 0) {
+                    System.out.println("Student was updated successfully!");
+                } else {
+                    System.out.println("Failed to Update Student Information.");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+        }
+    }
+
+    public Student getStudentInfo(UUID userSession, String username) {
+
+        // Protect routes using roles
+        if ((loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN) &&
+                (loginSessionManager.getUser(userSession).getRole() != User.ROLE.IT) &&
+                (loginSessionManager.getUser(userSession).getRole() != User.ROLE.AUTH_STAFF)) {
+            System.out.println("User is not allowed to access this Students information.");
+            return null;
+        }
+
+        try (Connection connection = dataSource.getConnection()) {
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM student_info WHERE user_id = '" + username + "'");
+            if (!resultSet.next()) {
+                System.out.println("Student does not exist.");
+                return null;
+            }
+            // found the student so return it
+            return new Student(username, resultSet.getString("net_id"), resultSet.getString("first_name"),
+                    resultSet.getString("last_name"), resultSet.getString("ethnicity"), resultSet.getString("gender"),
+                    resultSet.getString("major"), resultSet.getString("year"), resultSet.getDouble("gpa"), resultSet.getBoolean("citizenship"));
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return null;
         }
     }
 
