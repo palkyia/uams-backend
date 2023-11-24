@@ -1,5 +1,9 @@
 import org.postgresql.ds.PGSimpleDataSource;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.StandardCopyOption;
+import java.sql.Array;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,6 +12,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class UamsDAO {
 
@@ -206,9 +212,126 @@ public class UamsDAO {
         }
     }
 
+
+    /*
+    Application-related Functions
+     */
+    public boolean saveApplication(UUID userSession, Application application) {
+
+        String loggedUsername = loginSessionManager.getUser(userSession).getUsername();
+        String applicantUsername = application.getUsername();
+
+        // Protect by authenticating application ownership by user
+        if (!loggedUsername.equals(applicantUsername)) {
+            System.out.println("User is not owner of Application.");
+            return false;
+        }
+        try (Connection connection = dataSource.getConnection()) {
+
+            // Check if application already exists
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM applications WHERE student_username = '" + application.getUsername() + "' AND scholarship_id = '" + application.getScholarshipID().toString() + "'");
+
+            if (resultSet.next()) {
+                // overwrite existing with new
+                String uploadServerLocation = uploadFileToServer(application.getUploadedFile());
+                connection.createStatement().execute("UPDATE applications SET custom_responses = %s, uploaded_file_path = '%s' WHERE student_username = '%s' AND scholarship_id = '%s'".formatted(arrayToSQLString(application.getResponses()), uploadServerLocation, application.getUsername(), application.getScholarshipID().toString()));
+            } else {
+                // no existing, so insert new
+                String uploadServerLocation = uploadFileToServer(application.getUploadedFile());
+                connection.createStatement().execute("INSERT INTO applications (scholarship_id, student_username, custom_responses, uploaded_file_path) VALUES ('%s', '%s', %s, '%s')".formatted(application.getScholarshipID().toString(), application.getUsername(), arrayToSQLString(application.getResponses()), uploadServerLocation));
+            }
+            return true;
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return false;
+        }
+
+    }
+
+    public Application getApplication(UUID userSession, String username, UUID scholarshipID) {
+
+        // Protect routes using roles
+        if ((loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN)
+                || !loginSessionManager.getUser(userSession).getUsername().equals(username)) {
+            System.out.println("User is not allowed to access this application.");
+            return null;
+        }
+        try (Connection connection = dataSource.getConnection()) {
+            // retrieve application
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM applications WHERE student_username = '" + username + "' AND scholarship_id = '" + scholarshipID.toString() + "'");
+            if (!resultSet.next()) {
+                System.out.println("Application not found.");
+                return null;
+            }
+            // found, so return it
+            File appilcation_file = new File(resultSet.getString("uploaded_file_path"));
+            return new Application(username, scholarshipID, (String[]) (resultSet.getArray("custom_responses")).getArray(), appilcation_file);
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return null;
+        }
+    }
+
+    /**
+     * Saves a file into the UASAMS server
+     *
+     * @param inputFile
+     * @return String (location file was saved in server), else null (error saving)
+     */
+    public static String uploadFileToServer(File inputFile) {
+        String uploadFolderName = "file_uploads";
+        String serverDirectory = System.getProperty("user.dir");
+        File uploadsFolder = new File(serverDirectory, uploadFolderName);
+
+        // Create the subfolder if it does not exist
+        if (!uploadsFolder.exists()) {
+            boolean folderCreated = uploadsFolder.mkdir();
+            if (!folderCreated) {
+                System.out.println("Failed to create folder for uploads.");
+                return null;
+            }
+        }
+
+        // Create a Path for the destination file in 'file_uploads' folder
+        Path destinationPath = uploadsFolder.toPath().resolve(inputFile.getName());
+
+        try {
+            // copy file to server
+            Files.copy(inputFile.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            return destinationPath.toString();
+        } catch (IOException e) {
+            System.out.println("Failed to copy the file.");
+            return null;
+        }
+    }
+
+
+    /*
+    Utility Functions
+     */
     private static void printDBError(SQLException e) {
         System.err.println("\tMessage:   " + e.getMessage());
         System.err.println("\tSQLState:  " + e.getSQLState());
         System.err.println("\tErrorCode: " + e.getErrorCode());
     }
+
+    private static String arrayToSQLString(String[] array) {
+        if (array == null || array.length == 0) {
+            return "ARRAY[]";
+        }
+
+        StringBuilder sb = new StringBuilder("ARRAY[");
+        for (int i = 0; i < array.length; i++) {
+            sb.append("'").append(array[i]).append("'");
+            if (i < array.length - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("]");
+
+        return sb.toString();
+    }
+
 }
