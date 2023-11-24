@@ -4,6 +4,7 @@ import org.postgresql.ds.PGSimpleDataSource;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.File;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -113,6 +114,53 @@ public class UamsDAO {
         }
     }
 
+    public ArrayList<Scholarship> RetrieveScholarshipsByName(UUID userSession, String name) {
+        try (Connection connection = dataSource.getConnection()) {
+            ArrayList<Scholarship> scholarships = new ArrayList<>();
+            PreparedStatement stmt = connection.prepareStatement("SELECT * FROM scholarship_forms WHERE name ILIKE ?");
+            stmt.setString(1, "%" + name + "%");
+            ResultSet resultSet = stmt.executeQuery();
+            while (resultSet.next()) {
+                // add scholarship to list
+                scholarships.add(new Scholarship(UUID.fromString(resultSet.getString("id")), resultSet.getString("name"), resultSet.getString("description"), (String[]) resultSet.getArray("custom_input_fields").getArray(), resultSet.getDate("deadline"), resultSet.getBoolean("is_required_email"), resultSet.getBoolean("is_required_netid"), resultSet.getBoolean("is_required_gpa"), resultSet.getBoolean("is_required_major"), resultSet.getBoolean("is_required_year"), resultSet.getBoolean("is_required_gender"), resultSet.getBoolean("is_required_ethnicity"), resultSet.getBoolean("is_required_citizenship"), resultSet.getBoolean("is_required_name"), new File(resultSet.getString("uploaded_file"))));
+            }
+            return scholarships;
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return null;
+        }
+
+    }
+
+    public ArrayList<Scholarship> RetrieveScholarshipsByKeywords(UUID userSession, ArrayList<String> keywords) {
+        try (Connection connection = dataSource.getConnection()) {
+            ArrayList<Scholarship> scholarships = new ArrayList<>();
+            StringBuilder query = new StringBuilder("SELECT * FROM scholarship_forms WHERE description ");
+            for (int i = 0; i < keywords.size(); i++) {
+                if (i == 0) {
+                    query.append("ILIKE ?");
+                } else {
+                    query.append("OR description ILIKE ?");
+                }
+            }
+            PreparedStatement stmt = connection.prepareStatement(query.toString());
+            for (int i = 0; i < keywords.size(); i++) {
+                stmt.setString(i + 1, "%" + keywords.get(i) + "%");
+            }
+            ResultSet resultSet = stmt.executeQuery();
+            while (resultSet.next()) {
+                scholarships.add(new Scholarship(UUID.fromString(resultSet.getString("id")), resultSet.getString("name"), resultSet.getString("description"), (String[]) resultSet.getArray("custom_input_fields").getArray(), resultSet.getDate("deadline"), resultSet.getBoolean("is_required_email"), resultSet.getBoolean("is_required_netid"), resultSet.getBoolean("is_required_gpa"), resultSet.getBoolean("is_required_major"), resultSet.getBoolean("is_required_year"), resultSet.getBoolean("is_required_gender"), resultSet.getBoolean("is_required_ethnicity"), resultSet.getBoolean("is_required_citizenship"), resultSet.getBoolean("is_required_name"), new File(resultSet.getString("uploaded_file"))));
+            }
+            return scholarships;
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return null;
+        }
+
+    }
+
     private static void printDBError(SQLException e) {
         System.err.println("\tMessage:   " + e.getMessage());
         System.err.println("\tSQLState:  " + e.getSQLState());
@@ -156,7 +204,7 @@ public class UamsDAO {
         }
     }
 
-    public boolean notifyDonorsOfApplication(String scholarshipId) {
+    public boolean notifyProvidersOfApplication(String scholarshipId) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement donorStmt = connection.prepareStatement("SELECT email, name, username FROM scholarship_forms JOIN donors ON scholarship_forms.id = donors.donor_scholarship JOIN public.users u on donors.donor_username = u.username WHERE scholarship_forms.id = ?");
             donorStmt.setString(1, scholarshipId);
