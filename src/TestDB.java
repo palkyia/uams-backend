@@ -1,6 +1,7 @@
 import java.util.Calendar;
 import java.util.Date;
 import java.io.File;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -20,6 +21,9 @@ public class TestDB {
         testUpdateStudent(uamsDAO);
         testGetStudentInfo(uamsDAO);
         testGetUserInfo(uamsDAO);
+        testCreateScholarship(uamsDAO);
+        testRetrieveScholarship(uamsDAO);
+        testUpdateScholarship(uamsDAO);
     }
 
     public static void testLogin(UamsDAO uamsDAO) {
@@ -35,6 +39,32 @@ public class TestDB {
         UUID sessionIDIT = uamsDAO.loginWithSecurityAnswer("IT_account", "IT_password", "What is your mother's maiden name?", "IT");
         // IT people modifies the user info
         uamsDAO.modifyUser(sessionIDIT, new User("jacob", "lol", User.ROLE.STUDENT, new String[]{"Phan", "lol", "lol"}), "jacob", "newpassword", new String[]{"1a", "2a", "3a"}, User.ROLE.PROVIDER);
+    }
+
+    public static void testCreateScholarship(UamsDAO uamsDAO) {
+        UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
+        String desktopPath = System.getProperty("user.home") + "\\Desktop";
+        File testfile = new File(desktopPath, "testfile.txt");
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2023, Calendar.NOVEMBER, 23);
+        Date date = new java.sql.Date(calendar.getTimeInMillis());
+        Scholarship newscholarship = new Scholarship(UUID.randomUUID(), "Dummy scholarship", "This is a test scholarship", new String[]{"custom, maybe file location"},
+                date, true, true, true, false, false, true, true,
+                false, false, testfile);
+        uamsDAO.CreateScholarship(sessionID, newscholarship);
+
+    }
+
+    public static void testRetrieveScholarship(UamsDAO uamsDAO) {
+        UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
+        Scholarship result = uamsDAO.RetrieveScholarshipForm(sessionID, UUID.fromString("8c752c0a-d3f8-445e-9c9b-95fc2b9cead3"));
+        System.out.println(result);
+    }
+
+    public static void testUpdateScholarship(UamsDAO uamsDAO) {
+        UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
+        uamsDAO.UpdateScholarshipForm(sessionID, UUID.fromString("8c752c0a-d3f8-445e-9c9b-95fc2b9cead3"), "description", "haha");
+        uamsDAO.UpdateScholarshipForm(sessionID, UUID.fromString("8c752c0a-d3f8-445e-9c9b-95fc2b9cead3"), "is_required_email", "false");
     }
 
     /**
@@ -187,10 +217,11 @@ public class TestDB {
     public static void testAutomatedDeadlineNotification(UamsDAO uamsDAO) {
         UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        calendar.set(2023, Calendar.NOVEMBER, 23);
         Date date = new java.sql.Date(calendar.getTimeInMillis());
         // TODO: use update/create scholarship methods to set time
 
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
         uamsDAO.checkAndNotifyDeadlines();
     }
 
