@@ -186,6 +186,31 @@ public class UamsDAO {
         }
     }
 
+
+    public User getUserInfo(UUID userSession, String username) {
+        if ((loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN) &&
+                (loginSessionManager.getUser(userSession).getRole() != User.ROLE.IT) &&
+                (loginSessionManager.getUser(userSession).getRole() != User.ROLE.AUTH_STAFF)) {
+            System.out.println("User is not allowed to access this user information.");
+            return null;
+        }
+
+        try (Connection connection = dataSource.getConnection()) {
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM users WHERE username = '" + username + "'");
+            if (!resultSet.next()) {
+                System.out.println("User does not exist.");
+                return null;
+            }
+            return new User(resultSet.getString("username"), resultSet.getString("password"), User.ROLE.valueOf(resultSet.getString("user_role")), (String[]) resultSet.getArray("security_answers").getArray(), resultSet.getString("email"), resultSet.getBoolean("enabled"));
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return null;
+        }
+
+
+    }
+
     public Student getStudentInfo(UUID userSession, String username) {
 
         // Protect routes using roles

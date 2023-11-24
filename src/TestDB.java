@@ -17,7 +17,7 @@ public class TestDB {
         testSaveStudent(uamsDAO);
         testUpdateStudent(uamsDAO);
         testGetStudentInfo(uamsDAO);
-
+        testGetUserInfo(uamsDAO);
     }
 
     public static void testLogin(UamsDAO uamsDAO) {
@@ -163,6 +163,22 @@ public class TestDB {
         System.out.println("GPA: " + student_got.getGpa());
         System.out.println("Citizenship Status: " + student_got.getCitizenshipStatus());
 
+    }
+
+    public static void testGetUserInfo(UamsDAO uamsDAO) {
+        UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
+        User user = uamsDAO.getUserInfo(sessionID, "IT_account");
+        if (user == null) {
+            System.out.println("Failed to get user information");
+        }
+
+
+        System.out.println("Username: " + user.getUsername());
+        System.out.println("Password: " + user.getPassword());
+        System.out.println("User role: " + user.getRole());
+        System.out.println("Security answers: " + user.getSecurityAnswersAsString());
+        System.out.println("Is enabled: " + user.isEnabled());
+        System.out.println("Email: " + user.getEmail());
     }
 }
 
