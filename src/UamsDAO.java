@@ -13,6 +13,8 @@ public class UamsDAO {
     private static final String DB_URL = "jdbc:postgresql://potent-markhor-10752.6wr.cockroachlabs.cloud:26257/defaultdb?sslmode=require";
     private static final String DB_USER = "jacob";
     private static final String DB_PASSWORD = "w0IvQemMCK9jmWXA8efx-Q";
+    private final String fromEmail = "team12sfwe301@gmail.com";
+    private final String EMAIL_PASS = "hwou gioz mcnm wios";
 
     private static final String[] securityQuestions = {
             "What is your mother's maiden name?",
@@ -30,11 +32,6 @@ public class UamsDAO {
         dataSource.setPassword(DB_PASSWORD);
         loginSessionManager = new LoginSessionManager();
 
-        final String fromEmail = "team12sfwe301@gmail.com"; //requires valid gmail id
-        final String password = "hwou gioz mcnm wios"; // correct password for gmail id
-        final String toEmail = "guy.that1987@gmail.com"; // can be any email id
-
-        System.out.println("TLSEmail Start");
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com"); //SMTP Host
         props.put("mail.smtp.port", "587"); //TLS Port
@@ -45,11 +42,10 @@ public class UamsDAO {
         Authenticator auth = new Authenticator() {
             //override the getPasswordAuthentication method
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(fromEmail, password);
+                return new PasswordAuthentication(fromEmail, EMAIL_PASS);
             }
         };
-        Session session = Session.getInstance(props, auth);
-        emailSession = session;
+        emailSession = Session.getInstance(props, auth);
 
     }
 
@@ -123,7 +119,7 @@ public class UamsDAO {
         System.err.println("\tErrorCode: " + e.getErrorCode());
     }
 
-    public void checkAndNotifyDeadlines() {
+    public boolean checkAndNotifyDeadlines() {
         try (Connection connection = dataSource.getConnection()) {
             HashSet<String> scholarshipIDs = new HashSet<>();
             PreparedStatement studentsStmt = connection.prepareStatement(" SELECT email, name, deadline, username, id FROM scholarship_forms JOIN applications ON scholarship_forms.id = applications.scholarship_id JOIN users ON student_username = username WHERE deadline <= NOW() + INTERVAL '1 day' AND deadline >= NOW()");
@@ -152,9 +148,53 @@ public class UamsDAO {
                     sendEmail(email, subject, body);
                 }
             }
+            return true;
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
             printDBError(e);
+            return false;
+        }
+    }
+
+    public boolean notifyDonorsOfApplication(String scholarshipId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement donorStmt = connection.prepareStatement("SELECT email, name, username FROM scholarship_forms JOIN donors ON scholarship_forms.id = donors.donor_scholarship JOIN public.users u on donors.donor_username = u.username WHERE scholarship_forms.id = ?");
+            donorStmt.setString(1, scholarshipId);
+            ResultSet resultSet = donorStmt.executeQuery();
+            while (resultSet.next()) {
+                String email = resultSet.getString("email");
+                String username = resultSet.getString("username");
+                String name = resultSet.getString("name");
+                String subject = "Scholarship Application Submitted";
+                String body = "Hello %s,\n\nThis is a notification that a student has submitted an application for your scholarship: '%s'.\n\nSincerely,\nUArizona Scholarship Application Management System".formatted(username, name);
+                sendEmail(email, subject, body);
+            }
+            return true;
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return false;
+        }
+    }
+
+    public boolean notifyReviewersOfApplication(String scholarshipId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement reviewerStmt = connection.prepareStatement("SELECT email, name, username FROM scholarship_forms JOIN reviewers ON scholarship_forms.id = reviewers.assigned_scholarship JOIN public.users u on reviewers.reviewer_username = u.username WHERE scholarship_forms.id = ?");
+            reviewerStmt.setString(1, scholarshipId);
+            ResultSet resultSet = reviewerStmt.executeQuery();
+            while (resultSet.next()) {
+                String email = resultSet.getString("email");
+                String username = resultSet.getString("username");
+                String name = resultSet.getString("name");
+                String subject = "Scholarship Application Submitted";
+                String body = "Hello %s,\n\nThis is a notification that a student has submitted an application for a scholarship you are assigned to review: '%s'.\n\nSincerely,\nUArizona Scholarship Application Management System".formatted(username, name);
+                sendEmail(email, subject, body);
+            }
+            return true;
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return false;
         }
     }
 
@@ -177,11 +217,11 @@ public class UamsDAO {
             msg.setSentDate(new Date());
 
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail, false));
-            System.out.println("Message is ready");
             Transport.send(msg);
 
-            System.out.println("EMail Sent Successfully!!");
+            System.out.printf("Email sent successfully to %s.%n", toEmail);
         } catch (Exception e) {
+            System.out.println("There was a problem sending the email.");
             e.printStackTrace();
         }
     }
