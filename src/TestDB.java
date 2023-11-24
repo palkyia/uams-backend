@@ -217,10 +217,11 @@ public class TestDB {
     public static void testAutomatedDeadlineNotification(UamsDAO uamsDAO) {
         UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        calendar.set(2023, Calendar.NOVEMBER, 23);
         Date date = new java.sql.Date(calendar.getTimeInMillis());
         // TODO: use update/create scholarship methods to set time
 
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
         uamsDAO.checkAndNotifyDeadlines();
     }
 
