@@ -1,3 +1,5 @@
+import java.util.Calendar;
+import java.util.Date;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -60,7 +62,7 @@ public class TestDB {
 
         // create a test application
         String[] responses = {"response1", "lol2", "something3", "1a", "2b", "3c", "lmao", "4d", "5e", "6f"};
-        Application application = new Application("jphan07", UUID.fromString("118c6269-5dbf-4efd-9e28-c178dd887319"), responses, testfile);
+        Application application = new Application("jphan07", UUID.fromString("118c6269-5dbf-4efd-9e28-c178dd887319"), responses, testfile, false);
 
         // attempt saving
         boolean isSaved = uamsDAO.saveApplication(sessionID, application);
@@ -180,5 +182,16 @@ public class TestDB {
         System.out.println("Is enabled: " + user.isEnabled());
         System.out.println("Email: " + user.getEmail());
     }
-}
 
+
+    public static void testAutomatedDeadlineNotification(UamsDAO uamsDAO) {
+        UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        Date date = new java.sql.Date(calendar.getTimeInMillis());
+        // TODO: use update/create scholarship methods to set time
+
+        uamsDAO.checkAndNotifyDeadlines();
+    }
+
+}
