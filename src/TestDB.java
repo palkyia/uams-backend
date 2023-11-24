@@ -83,7 +83,6 @@ public class TestDB {
         System.out.println("PathToFileUpload: %s".formatted(application_got.getUploadedFilePath()));
     }
 
-}
 
     public static void testSaveStudent(UamsDAO uamsDAO) {
         UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
