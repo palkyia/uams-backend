@@ -1,5 +1,3 @@
-import java.sql.Array;
-
 public class User {
     public static enum ROLE {
         ADMIN, STUDENT, REVIEWER, PROVIDER, IT, FUND_STEWARD, AUTH_STAFF
@@ -19,6 +17,13 @@ public class User {
         this.securityAnswers = securityAnswers;
         this.email = email;
         this.isEnabled = isEnabled;
+    }
+
+    public User(String username, String password, ROLE role, String[] securityAnswers) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+        this.securityAnswers = securityAnswers;
     }
 
     public String getUsername() {

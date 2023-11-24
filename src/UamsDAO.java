@@ -1,5 +1,6 @@
 import org.postgresql.ds.PGSimpleDataSource;
 
+import java.nio.charset.StandardCharsets;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.StandardCopyOption;
@@ -185,6 +186,31 @@ public class UamsDAO {
         }
     }
 
+
+    public User getUserInfo(UUID userSession, String username) {
+        if ((loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN) &&
+                (loginSessionManager.getUser(userSession).getRole() != User.ROLE.IT) &&
+                (loginSessionManager.getUser(userSession).getRole() != User.ROLE.AUTH_STAFF)) {
+            System.out.println("User is not allowed to access this user information.");
+            return null;
+        }
+
+        try (Connection connection = dataSource.getConnection()) {
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM users WHERE username = '" + username + "'");
+            if (!resultSet.next()) {
+                System.out.println("User does not exist.");
+                return null;
+            }
+            return new User(resultSet.getString("username"), resultSet.getString("password"), User.ROLE.valueOf(resultSet.getString("user_role")), (String[]) resultSet.getArray("security_answers").getArray(), resultSet.getString("email"), resultSet.getBoolean("enabled"));
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database.");
+            printDBError(e);
+            return null;
+        }
+
+
+    }
+
     public Student getStudentInfo(UUID userSession, String username) {
 
         // Protect routes using roles
@@ -304,6 +330,73 @@ public class UamsDAO {
         } catch (IOException e) {
             System.out.println("Failed to copy the file.");
             return null;
+        }
+    }
+
+
+    // Authority: IT, ADMIN, AUTH_STAFF
+    public boolean modifyUser(UUID userSession, User existingUser, String newUsername, String newPassword, String[] newSecurityAnswers, User.ROLE newUserRole) {
+        // check valid user session
+        if (loginSessionManager.getUser(userSession) == null) {
+            System.out.println("Invalid user session.");
+            return false;
+        }
+
+        // check user role
+        if (loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN && loginSessionManager.getUser(userSession).getRole() != User.ROLE.IT && loginSessionManager.getUser(userSession).getRole() != User.ROLE.AUTH_STAFF) {
+            System.out.println("No authority to modify the user.");
+            return false;
+        }
+
+        try (Connection connection = dataSource.getConnection()) {
+
+            ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM users WHERE username = '" + existingUser.getUsername() + "'");
+            if (!resultSet.next()) {
+                System.out.println("User does not exist.");
+                return false;
+            }
+
+            ResultSet resultSetStudentInfo = connection.createStatement().executeQuery("SELECT * FROM student_info WHERE user_id = '" + existingUser.getUsername() + "'");
+            if (!resultSetStudentInfo.next()) {
+                System.out.println("User does not exist (student_info).");
+                return false;
+            }
+
+            String updateQueryStudentInfo = "UPDATE student_info SET user_id = ? WHERE user_id = ?";
+            try (PreparedStatement updateStatementStudentInfo = connection.prepareStatement(updateQueryStudentInfo)) {
+                updateStatementStudentInfo.setString(1, newUsername);
+                updateStatementStudentInfo.setString(2, existingUser.getUsername());
+
+                int rowsAffectedStudentInfo = updateStatementStudentInfo.executeUpdate();
+                if (rowsAffectedStudentInfo > 0) {
+                    System.out.println("User information updated successfully (student_info).");
+                } else {
+                    System.out.println("Failed to update user information (student_info).");
+                }
+            }
+
+            String updateQuery = "UPDATE users SET username = ?, password = ?, user_role = ?, security_answers = ? WHERE username = ?";
+            try (PreparedStatement updateStatement = connection.prepareStatement(updateQuery)) {
+                updateStatement.setString(1, newUsername != null ? newUsername : existingUser.getUsername());
+                updateStatement.setString(2, newPassword != null ? newPassword : existingUser.getPassword());
+                updateStatement.setString(3, newUserRole.toString() != null ? newUserRole.toString() : String.valueOf(existingUser.getRole()));
+                updateStatement.setArray(4, newSecurityAnswers != null ? connection.createArrayOf("text", newSecurityAnswers) : connection.createArrayOf("text", existingUser.getSecurityAnswers()));
+                updateStatement.setString(5, existingUser.getUsername());
+
+                int rowsAffected = updateStatement.executeUpdate();
+                if (rowsAffected > 0) {
+                    System.out.println("User information updated successfully (users).");
+                    return true;
+                } else {
+                    System.out.println("Failed to update user information (users).");
+                    return false;
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("There was a problem with the database (modifyUser).");
+            printDBError(e);
+            return false;
         }
     }
 
