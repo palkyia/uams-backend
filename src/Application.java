@@ -11,16 +11,18 @@ public class Application {
     private UUID scholarshipID;
     private String[] responses; // user responses to ScholarshipForm's fields
     private File uploadedFile; // path to file inside UASAMS server
+    private boolean hasNotified; // whether the user has been notified of the application's status
 
 
     /*
     Constructors
     */
-    public Application(String username, UUID scholarshipID, String[] responses, File uploadedFile) {
+    public Application(String username, UUID scholarshipID, String[] responses, File uploadedFile, boolean hasNotified) {
         this.username = username;
         this.scholarshipID = scholarshipID;
         this.responses = responses;
         this.uploadedFile = uploadedFile;
+        this.hasNotified = hasNotified;
     }
 
 
@@ -45,6 +47,10 @@ public class Application {
 
     public String getUploadedFilePath() {
         return uploadedFile.getPath();
+    }
+
+    public boolean getHasNotified() {
+        return hasNotified;
     }
 
 
