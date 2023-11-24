@@ -7,6 +7,7 @@
     <list default="true" id="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" name="Changes" comment="">
       <change afterPath="$PROJECT_DIR$/src/Student.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" name="Changes" comment="merged">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Application.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Application.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/TestDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/TestDB.java" afterDir="false" />
@@ -58,7 +59,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "application",
+    "git-widget-placeholder": "user__info",
     "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "C:/Users/Gabe V/Downloads/Visual-Studio-2019-Dark-Theme.jar",
     "node.js.detected.package.eslint": "true",
@@ -108,6 +109,15 @@
       <workItem from="1700449284973" duration="13621000" />
       <workItem from="1700698508485" duration="3460000" />
     </task>
+    <task id="LOCAL-00001" summary="merged">
+      <option name="closed" value="true" />
+      <created>1700844788921</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1700844788921</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -136,16 +146,9 @@
       </map>
     </option>
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>15</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="merged" />
+    <option name="LAST_COMMIT_MESSAGE" value="merged" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
