@@ -35,8 +35,6 @@ public class TestDB {
         uamsDAO.modifyUser(sessionIDIT, new User("jacob", "lol", User.ROLE.STUDENT, new String[]{"Phan", "lol", "lol"}), "jacob", "newpassword", new String[]{"1a", "2a", "3a"}, User.ROLE.PROVIDER);
     }
 
-}
-
     /**
      * Tester for both UamsDAO
      * saveApplication() and
