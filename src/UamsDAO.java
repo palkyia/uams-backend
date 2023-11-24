@@ -1,34 +1,26 @@
 import org.postgresql.ds.PGSimpleDataSource;
 
-
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
-import java.sql.*;
-import java.util.*;
-import java.util.Date;
-import java.nio.charset.StandardCharsets;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.sql.Array;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.UUID;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.*;
 
 public class UamsDAO {
 
     private static final String DB_URL = "jdbc:postgresql://potent-markhor-10752.6wr.cockroachlabs.cloud:26257/defaultdb?sslmode=require";
     private static final String DB_USER = "jacob";
     private static final String DB_PASSWORD = "w0IvQemMCK9jmWXA8efx-Q";
+    private static final String fromEmail = "team12sfwe301@gmail.com";
+    private static final String EMAIL_PASS = "hwou gioz mcnm wios";
 
     private static final String[] securityQuestions = {
             "What is your mother's maiden name?",
@@ -37,6 +29,7 @@ public class UamsDAO {
     };
     private PGSimpleDataSource dataSource;
     private LoginSessionManager loginSessionManager;
+    private Session emailSession;
 
     public UamsDAO() {
         dataSource = new PGSimpleDataSource();
@@ -289,7 +282,10 @@ public class UamsDAO {
                 // no existing, so insert new
                 String uploadServerLocation = uploadFileToServer(application.getUploadedFile());
                 connection.createStatement().execute("INSERT INTO applications (scholarship_id, student_username, custom_responses, uploaded_file_path) VALUES ('%s', '%s', %s, '%s')".formatted(application.getScholarshipID().toString(), application.getUsername(), arrayToSQLString(application.getResponses()), uploadServerLocation));
+                notifyReviewersOfApplication(application.getScholarshipID().toString());
+                notifyProvidersOfApplication(application.getScholarshipID().toString());
             }
+            checkAndNotifyDeadlines();
             return true;
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
@@ -300,7 +296,7 @@ public class UamsDAO {
     }
 
     public Application getApplication(UUID userSession, String username, UUID scholarshipID) {
-
+        checkAndNotifyDeadlines();
         // Protect routes using roles
         if ((loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN)
                 || !loginSessionManager.getUser(userSession).getUsername().equals(username)) {
@@ -316,7 +312,7 @@ public class UamsDAO {
             }
             // found, so return it
             File appilcation_file = new File(resultSet.getString("uploaded_file_path"));
-            return new Application(username, scholarshipID, (String[]) (resultSet.getArray("custom_responses")).getArray(), appilcation_file);
+            return new Application(username, scholarshipID, (String[]) (resultSet.getArray("custom_responses")).getArray(), appilcation_file, resultSet.getBoolean("has_notified"));
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
             printDBError(e);
@@ -471,15 +467,16 @@ public class UamsDAO {
         }
 
     }
-
-
-
+    
     public boolean checkAndNotifyDeadlines() {
         try (Connection connection = dataSource.getConnection()) {
             HashSet<String> scholarshipIDs = new HashSet<>();
-            PreparedStatement studentsStmt = connection.prepareStatement(" SELECT email, name, deadline, username, id FROM scholarship_forms JOIN applications ON scholarship_forms.id = applications.scholarship_id JOIN users ON student_username = username WHERE deadline <= NOW() + INTERVAL '1 day' AND deadline >= NOW()");
+            PreparedStatement studentsStmt = connection.prepareStatement(" SELECT email, name, deadline, username, id, has_notified FROM scholarship_forms JOIN applications ON scholarship_forms.id = applications.scholarship_id JOIN users ON student_username = username WHERE deadline <= NOW() + INTERVAL '1 day' AND deadline >= NOW()");
             ResultSet resultSet = studentsStmt.executeQuery();
             while (resultSet.next()) {
+                if (resultSet.getBoolean("has_notified")) {
+                    continue;
+                }
                 String email = resultSet.getString("email");
                 String scholarshipName = resultSet.getString("name");
                 Date deadline = resultSet.getDate("deadline");
@@ -502,6 +499,11 @@ public class UamsDAO {
                     String body = "Hello %s,\n\nThis is a reminder that the deadline for the scholarship you are assigned to review: '%s' is due on %s.\n\nSincerely,\nUArizona Scholarship Application Management System".formatted(username, scholarshipName, deadline);
                     sendEmail(email, subject, body);
                 }
+            }
+            PreparedStatement updateNotifiedStmt = connection.prepareStatement("UPDATE applications SET has_notified = true WHERE scholarship_id = ?");
+            for (String scholarshipID : scholarshipIDs) {
+                updateNotifiedStmt.setString(1, scholarshipID);
+                updateNotifiedStmt.executeUpdate();
             }
             return true;
         } catch (SQLException e) {
@@ -580,7 +582,6 @@ public class UamsDAO {
             e.printStackTrace();
         }
     }
-
 
 
     /*

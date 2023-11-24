@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" name="Changes" comment="add donor/reviewer notif">
-      <change afterPath="$PROJECT_DIR$/src/Scholarship.java" afterDir="false" />
+    <list default="true" id="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" name="Changes" comment="scholarships class">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Application.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Application.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/TestDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/TestDB.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/UamsDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/UamsDAO.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -116,7 +118,7 @@
       <workItem from="1700817333479" duration="1619000" />
       <workItem from="1700842011736" duration="3817000" />
       <workItem from="1700846967413" duration="157000" />
-      <workItem from="1700847136220" duration="347000" />
+      <workItem from="1700847136220" duration="3630000" />
     </task>
     <task id="LOCAL-00001" summary="add roles">
       <option name="closed" value="true" />
@@ -150,7 +152,23 @@
       <option name="project" value="LOCAL" />
       <updated>1700815721213</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="scholarships class">
+      <option name="closed" value="true" />
+      <created>1700848197136</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1700848197136</updated>
+    </task>
+    <task id="LOCAL-00006" summary="scholarships class">
+      <option name="closed" value="true" />
+      <created>1700848219943</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1700848219943</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -184,30 +202,20 @@
     <MESSAGE value="emails" />
     <MESSAGE value="add deadline notifications" />
     <MESSAGE value="add donor/reviewer notif" />
-    <option name="LAST_COMMIT_MESSAGE" value="add donor/reviewer notif" />
+    <MESSAGE value="scholarships class" />
+    <option name="LAST_COMMIT_MESSAGE" value="scholarships class" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
+        <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>12</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/UamsDAO.java</url>
-          <line>172</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>13</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/UamsDAO.java</url>
-          <line>171</line>
-          <option name="timeStamp" value="6" />
+          <line>46</line>
+          <properties class="TestDB" method="testSaveApplication">
+            <option name="EMULATED" value="true" />
+            <option name="WATCH_EXIT" value="false" />
+          </properties>
+          <option name="timeStamp" value="7" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

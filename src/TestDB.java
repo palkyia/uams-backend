@@ -62,7 +62,7 @@ public class TestDB {
 
         // create a test application
         String[] responses = {"response1", "lol2", "something3", "1a", "2b", "3c", "lmao", "4d", "5e", "6f"};
-        Application application = new Application("jphan07", UUID.fromString("118c6269-5dbf-4efd-9e28-c178dd887319"), responses, testfile);
+        Application application = new Application("jphan07", UUID.fromString("118c6269-5dbf-4efd-9e28-c178dd887319"), responses, testfile, false);
 
         // attempt saving
         boolean isSaved = uamsDAO.saveApplication(sessionID, application);
@@ -182,13 +182,7 @@ public class TestDB {
         System.out.println("Is enabled: " + user.isEnabled());
         System.out.println("Email: " + user.getEmail());
     }
-}
 
-
-    public static void test(UamsDAO uamsDAO) {
-
-
-    }
 
     public static void testAutomatedDeadlineNotification(UamsDAO uamsDAO) {
         UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
