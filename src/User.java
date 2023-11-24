@@ -47,8 +47,6 @@ public class User {
         return securityAnswersAsString;
     }
 
-
-
     public boolean isEnabled() {
         return isEnabled;
     }

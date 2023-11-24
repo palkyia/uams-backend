@@ -18,7 +18,7 @@ public class TestDB {
 
     public static void testLogin(UamsDAO uamsDAO) {
         UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
-        uamsDAO.createUser(sessionID, new User("jacob", "lol", User.ROLE.STUDENT, new String[]{"Phan", "lol", "lol"}, true));
+        uamsDAO.createUser(sessionID, new User("jacob", "lol", User.ROLE.STUDENT, new String[]{"Phan", "lol", "lol"}, "jphan07@arizona.edu", true));
     }
 
     public static void testCreateScholarship(UamsDAO uamsDAO){
