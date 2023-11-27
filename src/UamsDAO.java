@@ -140,8 +140,8 @@ public class UamsDAO {
             }
             Custom += "]";
             // insert new scholarship from newScholarship fields
-            connection.createStatement().execute("INSERT INTO scholarship_forms VALUES ('%s', '%s', %s, '%s', '%s', '%b', '%b', '%b', '%b', '%b', '%b', '%b', '%b', '%b', '%s')".formatted
-                    (newScholarship.getId().toString(), newScholarship.getName(), Custom, newScholarship.getDeadline().toString(), newScholarship.getDescription(), newScholarship.isRequiredEmail(), newScholarship.isRequirednetID(), newScholarship.isRequiredGPA(), newScholarship.isRequiredMajor(), newScholarship.isRequiredYear(), newScholarship.isRequiredGender(), newScholarship.isRequiredEthnicity(), newScholarship.isRequiredCitizenship(), newScholarship.isRequiredName(), newScholarship.getUploadedFile().getPath()));
+            connection.createStatement().execute("INSERT INTO scholarship_forms VALUES ('%s', '%s', %s, '%s', '%s', '%b', '%b', '%b', '%b', '%b', '%b', '%b', '%b', '%b', '%s', %d)".formatted
+                    (newScholarship.getId().toString(), newScholarship.getName(), Custom, newScholarship.getDeadline().toString(), newScholarship.getDescription(), newScholarship.isRequiredEmail(), newScholarship.isRequirednetID(), newScholarship.isRequiredGPA(), newScholarship.isRequiredMajor(), newScholarship.isRequiredYear(), newScholarship.isRequiredGender(), newScholarship.isRequiredEthnicity(), newScholarship.isRequiredCitizenship(), newScholarship.isRequiredName(), newScholarship.getUploadedFile().getPath(), newScholarship.getAwardAmount()));
             return true;
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
@@ -151,7 +151,8 @@ public class UamsDAO {
     }
 
 
-    public ArrayList<Scholarship> RetrieveScholarshipByID(UUID userSession, UUID id) {
+    public Scholarship RetrieveScholarshipByID(UUID userSession, UUID id) {
+        checkAndNotifyDeadlines();
         //Query the database Scholarship_forms looking for a scholarship that matches the given name and deadline
 
         if ((loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN) && (loginSessionManager.getUser(userSession).getRole() != User.ROLE.STUDENT) && (loginSessionManager.getUser(userSession).getRole() != User.ROLE.PROVIDER)) {
@@ -159,16 +160,15 @@ public class UamsDAO {
             return null;
         }
         try (Connection connection = dataSource.getConnection()) {
-            ArrayList<Scholarship> scholarships = new ArrayList<>();
 
             // Check if user already exists
             ResultSet resultSet = connection.createStatement().executeQuery("SELECT * FROM scholarship_forms WHERE id = '" + id + "'");
             if (resultSet.next()) {
-                scholarships.add(new Scholarship(UUID.fromString(resultSet.getString("id")), resultSet.getString("name"), resultSet.getString("description"), (String[]) resultSet.getArray("custom_input_fields").getArray(), resultSet.getDate("deadline"), resultSet.getBoolean("is_required_email"), resultSet.getBoolean("is_required_netid"), resultSet.getBoolean("is_required_gpa"), resultSet.getBoolean("is_required_major"), resultSet.getBoolean("is_required_year"), resultSet.getBoolean("is_required_gender"), resultSet.getBoolean("is_required_ethnicity"), resultSet.getBoolean("is_required_citizenship"), resultSet.getBoolean("is_required_name"), new File(resultSet.getString("uploaded_file_path"))));
+                return new Scholarship(UUID.fromString(resultSet.getString("id")), resultSet.getString("name"), resultSet.getString("description"), (String[]) resultSet.getArray("custom_input_fields").getArray(), resultSet.getDate("deadline"), resultSet.getBoolean("is_required_email"), resultSet.getBoolean("is_required_netid"), resultSet.getBoolean("is_required_gpa"), resultSet.getBoolean("is_required_major"), resultSet.getBoolean("is_required_year"), resultSet.getBoolean("is_required_gender"), resultSet.getBoolean("is_required_ethnicity"), resultSet.getBoolean("is_required_citizenship"), resultSet.getBoolean("is_required_name"), new File(resultSet.getString("uploaded_file_path")), resultSet.getInt("award_amount"));
             } else {
                 return null;
             }
-            return scholarships;
+
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
             printDBError(e);
@@ -177,6 +177,7 @@ public class UamsDAO {
     }
 
     public ArrayList<Scholarship> RetrieveScholarshipsByName(UUID userSession, String name) {
+        checkAndNotifyDeadlines();
         try (Connection connection = dataSource.getConnection()) {
             ArrayList<Scholarship> scholarships = new ArrayList<>();
             PreparedStatement stmt = connection.prepareStatement("SELECT * FROM scholarship_forms WHERE name ILIKE ?");
@@ -184,7 +185,7 @@ public class UamsDAO {
             ResultSet resultSet = stmt.executeQuery();
             while (resultSet.next()) {
                 // add scholarship to list
-                scholarships.add(new Scholarship(UUID.fromString(resultSet.getString("id")), resultSet.getString("name"), resultSet.getString("description"), (String[]) resultSet.getArray("custom_input_fields").getArray(), resultSet.getDate("deadline"), resultSet.getBoolean("is_required_email"), resultSet.getBoolean("is_required_netid"), resultSet.getBoolean("is_required_gpa"), resultSet.getBoolean("is_required_major"), resultSet.getBoolean("is_required_year"), resultSet.getBoolean("is_required_gender"), resultSet.getBoolean("is_required_ethnicity"), resultSet.getBoolean("is_required_citizenship"), resultSet.getBoolean("is_required_name"), new File(resultSet.getString("uploaded_file_path"))));
+                scholarships.add(new Scholarship(UUID.fromString(resultSet.getString("id")), resultSet.getString("name"), resultSet.getString("description"), (String[]) resultSet.getArray("custom_input_fields").getArray(), resultSet.getDate("deadline"), resultSet.getBoolean("is_required_email"), resultSet.getBoolean("is_required_netid"), resultSet.getBoolean("is_required_gpa"), resultSet.getBoolean("is_required_major"), resultSet.getBoolean("is_required_year"), resultSet.getBoolean("is_required_gender"), resultSet.getBoolean("is_required_ethnicity"), resultSet.getBoolean("is_required_citizenship"), resultSet.getBoolean("is_required_name"), new File(resultSet.getString("uploaded_file_path")), resultSet.getInt("award_amount")));
             }
             return scholarships;
         } catch (SQLException e) {
@@ -196,6 +197,7 @@ public class UamsDAO {
     }
 
     public ArrayList<Scholarship> RetrieveScholarshipsByKeywords(UUID userSession, ArrayList<String> keywords) {
+        checkAndNotifyDeadlines();
         try (Connection connection = dataSource.getConnection()) {
             ArrayList<Scholarship> scholarships = new ArrayList<>();
             StringBuilder query = new StringBuilder("SELECT * FROM scholarship_forms WHERE description ");
@@ -212,7 +214,7 @@ public class UamsDAO {
             }
             ResultSet resultSet = stmt.executeQuery();
             while (resultSet.next()) {
-                scholarships.add(new Scholarship(UUID.fromString(resultSet.getString("id")), resultSet.getString("name"), resultSet.getString("description"), (String[]) resultSet.getArray("custom_input_fields").getArray(), resultSet.getDate("deadline"), resultSet.getBoolean("is_required_email"), resultSet.getBoolean("is_required_netid"), resultSet.getBoolean("is_required_gpa"), resultSet.getBoolean("is_required_major"), resultSet.getBoolean("is_required_year"), resultSet.getBoolean("is_required_gender"), resultSet.getBoolean("is_required_ethnicity"), resultSet.getBoolean("is_required_citizenship"), resultSet.getBoolean("is_required_name"), new File(resultSet.getString("uploaded_file_path"))));
+                scholarships.add(new Scholarship(UUID.fromString(resultSet.getString("id")), resultSet.getString("name"), resultSet.getString("description"), (String[]) resultSet.getArray("custom_input_fields").getArray(), resultSet.getDate("deadline"), resultSet.getBoolean("is_required_email"), resultSet.getBoolean("is_required_netid"), resultSet.getBoolean("is_required_gpa"), resultSet.getBoolean("is_required_major"), resultSet.getBoolean("is_required_year"), resultSet.getBoolean("is_required_gender"), resultSet.getBoolean("is_required_ethnicity"), resultSet.getBoolean("is_required_citizenship"), resultSet.getBoolean("is_required_name"), new File(resultSet.getString("uploaded_file_path")), resultSet.getInt("award_amount")));
             }
             return scholarships;
         } catch (SQLException e) {
@@ -226,13 +228,14 @@ public class UamsDAO {
     public void UpdateScholarshipForm(UUID userSession, UUID id, String updateWhat, String updateTo) {
         if ((loginSessionManager.getUser(userSession).getRole() != User.ROLE.ADMIN) && (loginSessionManager.getUser(userSession).getRole() != User.ROLE.PROVIDER)) {
             System.out.println("User is not an admin or a provider.");
+            return;
         }
         try (Connection connection = dataSource.getConnection()) {
             String updateQ = "UPDATE scholarship_forms SET " + updateWhat + " = ? WHERE id = ?";
             PreparedStatement prepare = connection.prepareStatement(updateQ);
             prepare.setString(2, id.toString());
             // Check if scholarship exists
-            ArrayList<Scholarship> oldScholarship = RetrieveScholarshipByID(userSession, id);
+            Scholarship oldScholarship = RetrieveScholarshipByID(userSession, id);
             if (oldScholarship == null) {
                 System.out.println("scholarship does not exist.");
             }
@@ -255,8 +258,7 @@ public class UamsDAO {
         }
         try (Connection connection = dataSource.getConnection()) {
             // Check if scholarship already exists
-
-            ResultSet resultSet = connection.createStatement().executeQuery("DELETE FROM scholarship_forms where EXTRACT(YEAR FROM deadline) =  '" + year + "'");
+            connection.createStatement().execute("DELETE FROM scholarship_forms where EXTRACT(YEAR FROM deadline) =  '" + year + "'");
 
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
@@ -425,10 +427,12 @@ public class UamsDAO {
                 // overwrite existing with new
                 String uploadServerLocation = uploadFileToServer(application.getUploadedFile());
                 connection.createStatement().execute("UPDATE applications SET custom_responses = %s, uploaded_file_path = '%s' WHERE student_username = '%s' AND scholarship_id = '%s'".formatted(arrayToSQLString(application.getResponses()), uploadServerLocation, application.getUsername(), application.getScholarshipID().toString()));
+                sendEmail(loginSessionManager.getUser(userSession).getEmail(), "Scholarship Application Updated", "Your application for the scholarship: '%s' has been updated.".formatted(RetrieveScholarshipByID(userSession, application.getScholarshipID()).getName()));
             } else {
                 // no existing, so insert new
                 String uploadServerLocation = uploadFileToServer(application.getUploadedFile());
                 connection.createStatement().execute("INSERT INTO applications (scholarship_id, student_username, custom_responses, uploaded_file_path) VALUES ('%s', '%s', %s, '%s')".formatted(application.getScholarshipID().toString(), application.getUsername(), arrayToSQLString(application.getResponses()), uploadServerLocation));
+                sendEmail(loginSessionManager.getUser(userSession).getEmail(), "Scholarship Application Submitted", "Your application for the scholarship: '%s' has been submitted.".formatted(RetrieveScholarshipByID(userSession, application.getScholarshipID()).getName()));
                 notifyReviewersOfApplication(application.getScholarshipID().toString());
                 notifyProvidersOfApplication(application.getScholarshipID().toString());
             }
@@ -568,7 +572,7 @@ public class UamsDAO {
     }
 
 
-    public boolean checkAndNotifyDeadlines() {
+    private Set<String> checkAndNotifyDeadlines() {
         try (Connection connection = dataSource.getConnection()) {
             HashSet<String> scholarshipIDs = new HashSet<>();
             PreparedStatement studentsStmt = connection.prepareStatement(" SELECT email, name, deadline, username, id, has_notified FROM scholarship_forms JOIN applications ON scholarship_forms.id = applications.scholarship_id JOIN users ON student_username = username WHERE deadline <= NOW() + INTERVAL '1 day' AND deadline >= NOW()");
@@ -605,15 +609,16 @@ public class UamsDAO {
                 updateNotifiedStmt.setString(1, scholarshipID);
                 updateNotifiedStmt.executeUpdate();
             }
-            return true;
+            return scholarshipIDs;
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
             printDBError(e);
-            return false;
+            return new HashSet<String>() {
+            };
         }
     }
 
-    public boolean notifyProvidersOfApplication(String scholarshipId) {
+    private boolean notifyProvidersOfApplication(String scholarshipId) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement donorStmt = connection.prepareStatement("SELECT email, name, username FROM scholarship_forms JOIN donors ON scholarship_forms.id = donors.donor_scholarship JOIN public.users u on donors.donor_username = u.username WHERE scholarship_forms.id = ?");
             donorStmt.setString(1, scholarshipId);
@@ -634,7 +639,7 @@ public class UamsDAO {
         }
     }
 
-    public boolean notifyReviewersOfApplication(String scholarshipId) {
+    private boolean notifyReviewersOfApplication(String scholarshipId) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement reviewerStmt = connection.prepareStatement("SELECT email, name, username FROM scholarship_forms JOIN reviewers ON scholarship_forms.id = reviewers.assigned_scholarship JOIN public.users u on reviewers.reviewer_username = u.username WHERE scholarship_forms.id = ?");
             reviewerStmt.setString(1, scholarshipId);
