@@ -4,15 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" name="Changes" comment="11/24">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" name="Changes" comment="scholarships class">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/TestDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/TestDB.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/UamsDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/UamsDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/User.java" afterDir="false" />
-    </list>
-    <list id="f575c61d-0aa9-4afe-8b3d-ed96ab97cdb0" name="Changes by Jacob" comment="">
-      <change beforePath="$PROJECT_DIR$/src/TestDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/TestDB.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,25 +31,6 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="GithubProjectSettings">
-    <option name="branchProtectionPatterns">
-      <list>
-        <option value="master" />
-      </list>
-    </option>
-  </component>
-  <component name="LineStatusTrackerManager">
-    <file path="$PROJECT_DIR$/src/TestDB.java">
-      <ranges>
-        <range start1="3" end1="3" start2="3" end2="4" changelist="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" />
-        <range start1="5" end1="5" start2="6" end2="7" changelist="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" />
-        <range start1="21" end1="21" start2="23" end2="26" changelist="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" />
-        <range start1="38" end1="38" start2="43" end2="69" changelist="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" />
-        <range start1="188" end1="189" start2="219" end2="220" changelist="f575c61d-0aa9-4afe-8b3d-ed96ab97cdb0" />
-        <range start1="192" end1="192" start2="223" end2="224" changelist="f575c61d-0aa9-4afe-8b3d-ed96ab97cdb0" />
-      </ranges>
-    </file>
   </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
@@ -184,7 +160,23 @@
       <option name="project" value="LOCAL" />
       <updated>1700848219943</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="scholarships class">
+      <option name="closed" value="true" />
+      <created>1700856417455</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1700856417455</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Changes by Jacob">
+      <option name="closed" value="true" />
+      <created>1700856438705</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1700856438705</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -218,9 +210,10 @@
     <MESSAGE value="emails" />
     <MESSAGE value="add deadline notifications" />
     <MESSAGE value="add donor/reviewer notif" />
-    <MESSAGE value="scholarships class" />
     <MESSAGE value="11/24" />
-    <option name="LAST_COMMIT_MESSAGE" value="11/24" />
+    <MESSAGE value="scholarships class" />
+    <MESSAGE value="Changes by Jacob" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changes by Jacob" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

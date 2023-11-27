@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.io.File;
@@ -48,17 +49,25 @@ public class TestDB {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2023, Calendar.NOVEMBER, 23);
         Date date = new java.sql.Date(calendar.getTimeInMillis());
-        Scholarship newscholarship = new Scholarship(UUID.randomUUID(), "Dummy scholarship", "This is a test scholarship", new String[]{"custom, maybe file location"},
-                date, true, true, true, false, false, true, true,
-                false, false, testfile);
+        Scholarship newscholarship = new Scholarship(UUID.randomUUID(), "Test", "This is a test", new String[]{"custom"},
+                date, false, true, true, true, true, false, false,
+                true, true, testfile);
         uamsDAO.CreateScholarship(sessionID, newscholarship);
 
     }
 
     public static void testRetrieveScholarship(UamsDAO uamsDAO) {
         UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
-        Scholarship result = uamsDAO.RetrieveScholarshipForm(sessionID, UUID.fromString("8c752c0a-d3f8-445e-9c9b-95fc2b9cead3"));
+        ArrayList<Scholarship> result = uamsDAO.RetrieveScholarshipByID(sessionID, UUID.fromString("8c752c0a-d3f8-445e-9c9b-95fc2b9cead3"));
         System.out.println(result);
+        result = uamsDAO.RetrieveScholarshipsByName(sessionID, "Test");
+        System.out.println(result);
+        ArrayList<String> myKeywords = new ArrayList<>();
+        myKeywords.add("Test");
+        myKeywords.add("is");
+        result = uamsDAO.RetrieveScholarshipsByKeywords(sessionID, myKeywords);
+        System.out.println(result);
+
     }
 
     public static void testUpdateScholarship(UamsDAO uamsDAO) {
