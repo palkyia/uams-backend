@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
@@ -18,10 +19,11 @@ public class Scholarship {
     private boolean isRequiredCitizenship;
     private boolean isRequiredName;
     private File uploadedFile;
+    private int awardAmount;
 
 
     // constructor
-    public Scholarship(UUID id, String name, String description, String[] customInputFields, Date deadline, boolean isRequiredEmail, boolean isRequirednetID, boolean isRequiredGPA, boolean isRequiredMajor, boolean isRequiredYear, boolean isRequiredGender, boolean isRequiredEthnicity, boolean isRequiredCitizenship, boolean isRequiredName, File uploadedFile) {
+    public Scholarship(UUID id, String name, String description, String[] customInputFields, Date deadline, boolean isRequiredEmail, boolean isRequirednetID, boolean isRequiredGPA, boolean isRequiredMajor, boolean isRequiredYear, boolean isRequiredGender, boolean isRequiredEthnicity, boolean isRequiredCitizenship, boolean isRequiredName, File uploadedFile, int awardAmount) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -37,6 +39,7 @@ public class Scholarship {
         this.isRequiredCitizenship = isRequiredCitizenship;
         this.isRequiredName = isRequiredName;
         this.uploadedFile = uploadedFile;
+        this.awardAmount = awardAmount;
     }
 
     // getters
@@ -96,7 +99,33 @@ public class Scholarship {
         return isRequiredName;
     }
 
+
     public File getUploadedFile() {
         return uploadedFile;
+    }
+
+    public int getAwardAmount() {
+        return awardAmount;
+    }
+
+    @Override
+    public String toString() {
+        return "Scholarship{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+//                ", customInputFields=" + Arrays.toString(customInputFields) +
+//                ", deadline=" + deadline +
+//                ", isRequiredEmail=" + isRequiredEmail +
+//                ", isRequirednetID=" + isRequirednetID +
+//                ", isRequiredGPA=" + isRequiredGPA +
+//                ", isRequiredMajor=" + isRequiredMajor +
+//                ", isRequiredYear=" + isRequiredYear +
+//                ", isRequiredGender=" + isRequiredGender +
+//                ", isRequiredEthnicity=" + isRequiredEthnicity +
+//                ", isRequiredCitizenship=" + isRequiredCitizenship +
+//                ", isRequiredName=" + isRequiredName +
+//                ", uploadedFile=" + uploadedFile +
+                '}';
     }
 }

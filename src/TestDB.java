@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.io.File;
@@ -13,22 +14,33 @@ import org.postgresql.ds.PGSimpleDataSource;
 public class TestDB {
     public static void main(String[] args) {
         UamsDAO uamsDAO = new UamsDAO();
-        testLogin(uamsDAO);
-        testUpdateUserInfo(uamsDAO);
-        testSaveApplication(uamsDAO);
-        testGetApplication(uamsDAO);
-        testSaveStudent(uamsDAO);
-        testUpdateStudent(uamsDAO);
-        testGetStudentInfo(uamsDAO);
-        testGetUserInfo(uamsDAO);
-        testCreateScholarship(uamsDAO);
-        testRetrieveScholarship(uamsDAO);
-        testUpdateScholarship(uamsDAO);
-    }
+        System.out.println("Testing UamsDAO...");
 
-    public static void testLogin(UamsDAO uamsDAO) {
-        UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
-        uamsDAO.createUser(sessionID, new User("jacob", "lol", User.ROLE.STUDENT, new String[]{"Phan", "lol", "lol"}, "jphan07@arizona.edu", true));
+
+        System.out.println("\n\nTesting update user info...");
+
+        testUpdateUserInfo(uamsDAO);
+        System.out.println("\n\nTesting save application...");
+        testSaveApplication(uamsDAO);
+        System.out.println("\n\nTesting get application...");
+        testGetApplication(uamsDAO);
+        System.out.println("\n\nTesting save student...");
+        testSaveStudent(uamsDAO);
+        System.out.println("\n\nTesting update student...");
+        testUpdateStudent(uamsDAO);
+        System.out.println("\n\nTesting get student info...");
+        testGetStudentInfo(uamsDAO);
+        System.out.println("\n\nTesting get user info...");
+        testGetUserInfo(uamsDAO);
+        System.out.println("\n\nTesting create scholarship...");
+        testCreateScholarship(uamsDAO);
+        System.out.println("\n\nTesting retrieve scholarship...");
+        testRetrieveScholarship(uamsDAO);
+        System.out.println("\n\nTesting update scholarship...");
+        testUpdateScholarship(uamsDAO);
+        System.out.println("\n\nTesting remove scholarships by year...");
+        testRemoveScholarshipsByYear(uamsDAO);
+
     }
 
     public static void testUpdateUserInfo(UamsDAO uamsDAO) {
@@ -46,19 +58,28 @@ public class TestDB {
         String desktopPath = System.getProperty("user.home") + "\\Desktop";
         File testfile = new File(desktopPath, "testfile.txt");
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2023, Calendar.NOVEMBER, 23);
+        calendar.set(2022, Calendar.JANUARY, 1);
         Date date = new java.sql.Date(calendar.getTimeInMillis());
-        Scholarship newscholarship = new Scholarship(UUID.randomUUID(), "Dummy scholarship", "This is a test scholarship", new String[]{"custom, maybe file location"},
-                date, true, true, true, false, false, true, true,
-                false, false, testfile);
+        Scholarship newscholarship = new Scholarship(UUID.randomUUID(), "Trash Scholarship", "This is outdated", new String[]{"custom"},
+                date, false, true, true, true, true, false, false,
+                true, true, testfile, 10000);
         uamsDAO.CreateScholarship(sessionID, newscholarship);
 
     }
 
     public static void testRetrieveScholarship(UamsDAO uamsDAO) {
         UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
-        Scholarship result = uamsDAO.RetrieveScholarshipForm(sessionID, UUID.fromString("8c752c0a-d3f8-445e-9c9b-95fc2b9cead3"));
+        Scholarship result = uamsDAO.RetrieveScholarshipByID(sessionID, UUID.fromString("8c752c0a-d3f8-445e-9c9b-95fc2b9cead3"));
         System.out.println(result);
+        ArrayList<Scholarship> results = new ArrayList<>();
+        results = uamsDAO.RetrieveScholarshipsByName(sessionID, "Trash");
+        System.out.println(results);
+        ArrayList<String> myKeywords = new ArrayList<>();
+        myKeywords.add("Test");
+        myKeywords.add("is");
+        results = uamsDAO.RetrieveScholarshipsByKeywords(sessionID, myKeywords);
+        System.out.println(results);
+
     }
 
     public static void testUpdateScholarship(UamsDAO uamsDAO) {
@@ -135,7 +156,8 @@ public class TestDB {
         }
         //public boolean saveStudentInfo(UUID userSession, Student student)
 
-        Student student = new Student("IT_account", "test_netID"
+
+        Student student = new Student("new_student", "test_netID"
                 , "test_firstName", "test_lastName", "test_ethnicity",
                 "test_gender", "test_major", "test_Year",
                 4.0, true);
@@ -156,13 +178,14 @@ public class TestDB {
         //    String newEthnicity, String newGender, String newMajor,
         //  String newSchoolYear, double newGpa, boolean newCitizenshipStatus)
 
-        Student student = new Student("IT_account", "new_netID"
-                , "new_firstName", "new_lastName", "new_ethnicity",
-                "new_gender", "new_major", "new_Year",
-                3.5, true);
-        String newUsername = "IT_account";
-        String newNetID = "new_netID";
-        String newFirstName = "new_firstName";
+        Student student = new Student("new_student", "test_netID"
+                , "test_firstName", "test_lastName", "test_ethnicity",
+                "test_gender", "test_major", "test_Year",
+                4.0, true);
+
+        String newUsername = "new_student";
+        String newNetID = "UPDATED_NETID";
+        String newFirstName = "updated_firstName";
         String newLastName = "new_lastName";
         String newEthnicity = "new_ethnicity";
         String newGender = "new_gender";
@@ -178,7 +201,7 @@ public class TestDB {
 
     public static void testGetStudentInfo(UamsDAO uamsDAO) {
         UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
-        Student student_got = uamsDAO.getStudentInfo(sessionID, "IT_account");
+        Student student_got = uamsDAO.getStudentInfo(sessionID, "new_student");
         if (student_got == null) {
             System.out.println("Failed to get student information");
         }
@@ -213,16 +236,9 @@ public class TestDB {
         System.out.println("Email: " + user.getEmail());
     }
 
-
-    public static void testAutomatedDeadlineNotification(UamsDAO uamsDAO) {
+    public static void testRemoveScholarshipsByYear(UamsDAO uamsDAO) {
         UUID sessionID = uamsDAO.loginWithSecurityAnswer("jphan07", "lol", "What is your mother's maiden name?", "Phan");
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2023, Calendar.NOVEMBER, 23);
-        Date date = new java.sql.Date(calendar.getTimeInMillis());
-        // TODO: use update/create scholarship methods to set time
-
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
-        uamsDAO.checkAndNotifyDeadlines();
+        uamsDAO.RemoveScholarshipsYearly(sessionID, 2022);
     }
 
 }
