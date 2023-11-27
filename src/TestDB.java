@@ -18,7 +18,6 @@ public class TestDB {
 
 
         System.out.println("\n\nTesting update user info...");
-
         testUpdateUserInfo(uamsDAO);
         System.out.println("\n\nTesting save application...");
         testSaveApplication(uamsDAO);

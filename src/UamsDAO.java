@@ -109,7 +109,7 @@ public class UamsDAO {
                 System.out.println("User already exists.");
                 return false;
             }
-            connection.createStatement().execute("INSERT INTO users VALUES ('%s', '%s', '%s', %s, %s, %s)".formatted(newUser.getUsername(), newUser.getPassword(), newUser.getRole().toString(), newUser.getSecurityAnswersAsString(), newUser.isEnabled(), newUser.getEmail()));
+            connection.createStatement().execute("INSERT INTO users VALUES ('%s', '%s', '%s', %s, %s, '%s')".formatted(newUser.getUsername(), newUser.getPassword(), newUser.getRole().toString(), newUser.getSecurityAnswersAsString(), newUser.isEnabled(), newUser.getEmail()));
             return true;
         } catch (SQLException e) {
             System.out.println("There was a problem with the database.");
