@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" name="Changes" comment="scholarships class">
+    <list default="true" id="4d2e1dc7-5cd0-4e5c-9460-64fc28536831" name="Changes" comment="users">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/TestDB.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/TestDB.java" afterDir="false" />
     </list>
@@ -66,11 +66,11 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "database.data.extractors.current.export.id": "SQL Inserts",
+    "database.data.extractors.current.export.id": "Comma-separated (CSV)_id",
     "database.data.extractors.current.id": "SQL Inserts",
     "git-widget-placeholder": "Joey",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "D:/Documents/homework_4-1/CSC_453/Prog3",
+    "last_opened_file_path": "C:/Users/Jacob/IdeaProjects/uams-backend/Canned_data",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -125,6 +125,7 @@
       <workItem from="1700846967413" duration="157000" />
       <workItem from="1700847136220" duration="3630000" />
       <workItem from="1701047146231" duration="709000" />
+      <workItem from="1701062469872" duration="3178000" />
     </task>
     <task id="LOCAL-00001" summary="add roles">
       <option name="closed" value="true" />
@@ -206,7 +207,15 @@
       <option name="project" value="LOCAL" />
       <updated>1701055086228</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="users">
+      <option name="closed" value="true" />
+      <created>1701057960994</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1701057960994</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -244,60 +253,66 @@
     <MESSAGE value="Changes by Jacob" />
     <MESSAGE value="Merge pull request #9 from palkyia/Joey&#10;&#10;Joey" />
     <MESSAGE value="scholarships class" />
-    <option name="LAST_COMMIT_MESSAGE" value="scholarships class" />
+    <MESSAGE value="users" />
+    <option name="LAST_COMMIT_MESSAGE" value="users" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>19</line>
+          <line>18</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>21</line>
+          <line>20</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>25</line>
+          <line>24</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>27</line>
+          <line>26</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>29</line>
+          <line>28</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>35</line>
+          <line>34</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>33</line>
+          <line>32</line>
           <option name="timeStamp" value="9" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>31</line>
+          <line>30</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>37</line>
+          <line>36</line>
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/TestDB.java</url>
-          <line>39</line>
+          <line>38</line>
           <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/TestDB.java</url>
+          <line>22</line>
+          <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
